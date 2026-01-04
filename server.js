@@ -32,7 +32,7 @@ app.get("/api/clients", async (req, res) => {
     const out = rows.map((r) => ({
       id: r.id,
       name: r.name,
-      deuda_total: Math.max(0, Number(r.deuda_total)).toFixed(2),
+      deuda_total: (Math.round(Number(r.deuda_total) * 100) / 100).toFixed(2),
       fecha_ultimo_pago: r.fecha_ultimo_pago || null,
     }));
     res.json(out);
@@ -73,7 +73,7 @@ app.post("/api/clients/:id/sale", async (req, res) => {
   try {
     const clienteId = req.params.id;
     const { producto, cantidad, precio, fecha } = req.body;
-    const fechaFinal = fecha || new Date().toISOString().slice(0, 10);
+    const fechaFinal = fecha || new Date().toLocaleDateString("en-CA");
     const cant = Number(cantidad) || 0;
     const prec = Number(precio) || 0;
     const pago = 0;
@@ -103,7 +103,7 @@ app.post("/api/clients/:id/payment", async (req, res) => {
   try {
     const clienteId = req.params.id;
     const { monto, fecha } = req.body;
-    const fechaFinal = fecha || new Date().toISOString().slice(0, 10);
+    const fechaFinal = fecha || new Date().toLocaleDateString("en-CA");
     const pago = Number(monto) || 0;
 
     const sql = `
