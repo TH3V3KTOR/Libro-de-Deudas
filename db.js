@@ -1,5 +1,7 @@
-const { Pool } = require("pg");
+const { Pool, types } = require("pg");
 
+// Evitar que PostgreSQL DATE se convierta a Date (zona horaria)
+types.setTypeParser(1082, val => val);
 const connectionString = process.env.DATABASE_URL;
 
 const pool = new Pool({
