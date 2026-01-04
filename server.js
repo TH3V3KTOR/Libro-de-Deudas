@@ -217,20 +217,22 @@ app.listen(PORT, () =>
   console.log(`Servidor escuchando en http://localhost:${PORT}`)
 );
 
-app.put("/api/movimientos/:id/campo", (req, res) => {
-  const { campo, valor } = req.body;
-  const allowed = ["producto", "cantidad", "precio", "pago", "fecha"];
+app.put("/api/movimientos/:id/campo", async (req, res) => {
+  try {
+    const { campo, valor } = req.body;
+    const allowed = ["producto", "cantidad", "precio", "pago", "fecha"];
 
-  if (!allowed.includes(campo)) {
-    return res.status(400).json({ error: "Campo no permitido" });
-  }
-
-  db.run(
-    `UPDATE movimientos SET ${campo} = ? WHERE id = ?`,
-    [valor, req.params.id],
-    function (err) {
-      if (err) return res.status(500).json(err);
-      res.json({ ok: true });
+    if (!allowed.includes(campo)) {
+      return res.status(400).json({ error: "Campo no permitido" });
     }
-  );
+
+    const sql = `UPDATE movimientos SET ${campo} = $1 WHERE id = $2`;
+    await db.pool.query(sql, [valor, req.params.id]);
+
+    res.json({ ok: true });
+  } catch (err) {
+  console.error(err);
+  res.status(500).json([]); // SIEMPRE un array
+  }
 });
+
