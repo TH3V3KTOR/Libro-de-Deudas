@@ -125,11 +125,9 @@ function renderClients(clients) {
       </td>
       
       <td data-label="Último pago">
-        ${c.fecha_ultimo_pago ? new Date(c.fecha_ultimo_pago).toLocaleDateString('es-ES', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        }) : '<span style="color: var(--gray);">Sin pagos</span>'}
+        ${c.fecha_ultimo_pago
+  ? c.fecha_ultimo_pago.split("-").reverse().join("/")
+  : '<span style="color: var(--gray);">Sin pagos</span>'}
       </td>
       
       <td data-label="Acciones" class="actions-cell">
@@ -237,7 +235,7 @@ async function loadMovements() {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td data-label="Fecha">
-          ${r.fecha ? new Date(r.fecha).toLocaleDateString('es-ES') : '---'}
+          ${r.fecha ? r.fecha.split("-").reverse().join("/") : '---'}
         </td>
         
         <td data-label="Producto">
@@ -288,7 +286,7 @@ async function loadMovements() {
     });
 
     // Actualizar fechas por defecto en formularios
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toLocaleDateString("en-CA");
     const fechaVenta = document.getElementById('fecha-venta');
     const fechaPago = document.getElementById('fecha-pago');
     if (fechaVenta) fechaVenta.value = today;
@@ -348,7 +346,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("new-client-name");
 
   // Configurar fechas por defecto
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toLocaleDateString("en-CA");
   const fechaVenta = document.getElementById('fecha-venta');
   const fechaPago = document.getElementById('fecha-pago');
   if (fechaVenta) fechaVenta.value = today;
@@ -400,7 +398,7 @@ if (saleForm) {
       saleForm.reset();
       saleForm.style.display = "none"; // MODIFICACIÓN: Directo
       // Restaurar fecha actual
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toLocaleDateString("en-CA");
       document.getElementById('fecha-venta').value = today;
       
       await loadMovements();
@@ -428,7 +426,7 @@ if (payForm) {
       payForm.reset();
       payForm.style.display = "none"; // MODIFICACIÓN: Directo
       // Restaurar fecha actual
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toLocaleDateString("en-CA");
       document.getElementById('fecha-pago').value = today;
       
       await loadMovements();
