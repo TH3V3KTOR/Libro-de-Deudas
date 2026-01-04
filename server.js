@@ -47,12 +47,20 @@ app.get("/api/clients/:id/movements", async (req, res) => {
   try {
     const clienteId = req.params.id;
     const sql = `
-      SELECT id, cliente_id, producto, cantidad, precio, pago, fecha, 
-      ((cantidad*precio) - pago) as movimiento
-      FROM movimientos
-      WHERE cliente_id = $1
-      ORDER BY fecha DESC
-    `;
+  SELECT
+    id,
+    cliente_id,
+    producto,
+    cantidad,
+    precio,
+    pago,
+    fecha::text AS fecha,
+    ((cantidad*precio) - pago) AS movimiento
+  FROM movimientos
+  WHERE cliente_id = $1
+  ORDER BY fecha DESC
+`;
+
     const { rows } = await db.pool.query(sql, [clienteId]);
     const out = rows.map((r) => ({
       ...r,
@@ -73,7 +81,7 @@ app.post("/api/clients/:id/sale", async (req, res) => {
   try {
     const clienteId = req.params.id;
     const { producto, cantidad, precio, fecha } = req.body;
-    const fechaFinal = fecha || new Date().toLocaleDateString("en-CA");
+    const fechaFinal = fecha;
     const cant = Number(cantidad) || 0;
     const prec = Number(precio) || 0;
     const pago = 0;
@@ -84,12 +92,12 @@ app.post("/api/clients/:id/sale", async (req, res) => {
       RETURNING id
     `;
     const { rows } = await db.pool.query(sql, [
-      clienteId, 
-      producto || "Venta", 
-      cant, 
-      prec, 
-      pago, 
-      fechaFinal
+      clienteId,
+      producto || "Venta",
+      cant,
+      prec,
+      pago,
+      fechaFinal,
     ]);
     res.json({ id: rows[0].id });
   } catch (err) {
@@ -103,7 +111,7 @@ app.post("/api/clients/:id/payment", async (req, res) => {
   try {
     const clienteId = req.params.id;
     const { monto, fecha } = req.body;
-    const fechaFinal = fecha || new Date().toLocaleDateString("en-CA");
+    const fechaFinal = fecha;
     const pago = Number(monto) || 0;
 
     const sql = `
@@ -112,12 +120,12 @@ app.post("/api/clients/:id/payment", async (req, res) => {
       RETURNING id
     `;
     const { rows } = await db.pool.query(sql, [
-      clienteId, 
-      "Pago", 
-      0, 
-      0, 
-      pago, 
-      fechaFinal
+      clienteId,
+      "Pago",
+      0,
+      0,
+      pago,
+      fechaFinal,
     ]);
     res.json({ id: rows[0].id });
   } catch (err) {
@@ -131,7 +139,7 @@ app.post("/api/clients", async (req, res) => {
   try {
     const { name } = req.body;
     if (!name) return res.status(400).json({ error: "El nombre es requerido" });
-    
+
     const sql = `INSERT INTO clients (name) VALUES ($1) RETURNING id`;
     const { rows } = await db.pool.query(sql, [name]);
     res.json({ id: rows[0].id });
@@ -183,7 +191,7 @@ app.put("/api/movimientos/:id", async (req, res) => {
       Number(precio),
       Number(pago),
       fecha,
-      req.params.id
+      req.params.id,
     ]);
     res.json({ ok: true });
   } catch (err) {
@@ -231,8 +239,7 @@ app.put("/api/movimientos/:id/campo", async (req, res) => {
 
     res.json({ ok: true });
   } catch (err) {
-  console.error(err);
-  res.status(500).json([]); // SIEMPRE un array
+    console.error(err);
+    res.status(500).json([]); // SIEMPRE un array
   }
 });
-
