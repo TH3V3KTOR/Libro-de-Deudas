@@ -1081,3 +1081,52 @@ tbody tr:hover {
     padding: 10px !important;
   }
 }
+
+/* ===== ACCIONES COMPACTAS ===== */
+.actions {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+/* Botones */
+.actions button {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+/* ===== MOBILE FIX ===== */
+@media (max-width: 600px) {
+
+    table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    th, td {
+        padding: 8px 6px;
+        font-size: 14px;
+    }
+
+    th:nth-child(2),
+    td:nth-child(2) {
+        width: 80px; /* deuda */
+    }
+
+    th:nth-child(3),
+    td:nth-child(3) {
+        width: 90px; /* fecha */
+    }
+
+    .actions {
+        gap: 4px;
+    }
+
+    .actions button {
+        width: 32px;
+        height: 32px;
+        font-size: 15px;
+    }
+}
