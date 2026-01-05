@@ -1058,6 +1058,15 @@ tbody tr:hover {
   display: block !important;
 }
 
+.actions-cell {
+  display: flex;
+  gap: 12px;
+}
+
+.print-client {
+  background: #6c757d;
+}
+
 /* Para móvil, mantener las reglas específicas */
 @media (max-width: 767px) {
   #view-movements {

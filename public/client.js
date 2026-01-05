@@ -130,14 +130,19 @@ function renderClients(clients) {
   : '<span style="color: var(--gray);">Sin pagos</span>'}
       </td>
       
-      <td data-label="Acciones" class="actions-cell">
-        <button class="btn btn-primary view-mov-btn" data-id="${c.id}">
-          <i class="fas fa-eye"></i><span> Ver</span>
-        </button>
-        <button class="btn btn-danger delete-client" data-id="${c.id}" title="Eliminar cliente">
-          <i class="fas fa-trash"></i><span> Eliminar</span>
-        </button>
-      </td>
+    <td data-label="Acciones" class="actions-cell">
+      <button class="btn btn-primary view-mov-btn" data-id="${c.id}">
+        <i class="fas fa-eye"></i>
+      </button>
+
+      <button class="btn btn-secondary print-client" data-id="${c.id}" data-name="${c.name}">
+        <i class="fas fa-print"></i>
+      </button>
+
+      <button class="btn btn-danger delete-client" data-id="${c.id}">
+        <i class="fas fa-trash"></i>
+      </button>
+    </td>
     `;
 
     clientsTbody.appendChild(tr);
@@ -154,6 +159,37 @@ function renderClients(clients) {
       openMovements(id, name);
     });
   });
+
+  document.querySelectorAll(".print-client").forEach((btn) => {
+  btn.addEventListener("click", async (e) => {
+    const id = e.currentTarget.dataset.id;
+    const name = e.currentTarget.dataset.name;
+
+    const rows = await api.getMovements(id);
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.text(`Movimientos de: ${name}`, 14, 15);
+
+    const tableData = rows.map(r => ([
+      r.fecha ? r.fecha.split("-").reverse().join("/") : "",
+      r.producto || "",
+      r.cantidad,
+      r.precio,
+      r.pago,
+    ]));
+
+    doc.autoTable({
+      startY: 20,
+      head: [["Fecha", "Producto", "Cantidad", "Precio", "Pago"]],
+      body: tableData,
+    });
+
+    doc.save(`movimientos_${name}.pdf`);
+  });
+});
+
 
   // eventos para eliminar cliente
   document.querySelectorAll(".delete-client").forEach((btn) => {
@@ -505,6 +541,36 @@ if (searchInput) {
     renderClients(filtered);
   });
 }
+
+const printSummaryBtn = document.getElementById("print-summary");
+
+if (printSummaryBtn) {
+  printSummaryBtn.addEventListener("click", async () => {
+    const clients = await api.getClients();
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.text("Resumen General de Clientes", 14, 15);
+
+    const data = clients.map(c => ([
+      c.name,
+      c.deuda_total,
+      c.fecha_ultimo_pago
+        ? c.fecha_ultimo_pago.split("-").reverse().join("/")
+        : "—"
+    ]));
+
+    doc.autoTable({
+      startY: 20,
+      head: [["Cliente", "Deuda Total", "Último Pago"]],
+      body: data,
+    });
+
+    doc.save("resumen_clientes.pdf");
+  });
+}
+
 
 // ===== MODAL CONFIRMACIÓN =====
 const modal = document.getElementById("confirm-modal");

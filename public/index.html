@@ -19,6 +19,9 @@
 
             <input id="new-client-name" placeholder="Nombre del cliente" />
             <button id="add-client-btn">Agregar cliente</button>
+            <button id="print-summary" style="margin-left:10px">
+                <i class="fas fa-print"></i> Imprimir resumen
+            </button>
 
             <table id="clients-table">
                 <thead>
@@ -55,38 +58,38 @@
 
         <div id="forms">
             <form id="sale-form" style="display:none">
-    <h3><i class="fas fa-cart-plus"></i> Agregar Venta</h3>
-    <label>Producto <input name="producto" required /></label>
-    <label>Cantidad <input name="cantidad" type="number" min="0" step="1" value="1" required /></label>
-    <label>Precio <input name="precio" type="number" min="0" step="0.01" value="0.00" required /></label>
-    <label>Fecha <input id="fecha-venta" name="fecha" type="date" /></label>
-    <div class="form-buttons">
-        <button type="submit">
-            <i class="fas fa-check-circle"></i>
-            <span>Guardar Venta</span>
-        </button>
-        <button type="button" id="cancel-sale">
-            <i class="fas fa-times-circle"></i>
-            <span>Cancelar</span>
-        </button>
-    </div>
-</form>
+                <h3><i class="fas fa-cart-plus"></i> Agregar Venta</h3>
+                <label>Producto <input name="producto" required /></label>
+                <label>Cantidad <input name="cantidad" type="number" min="0" step="1" value="1" required /></label>
+                <label>Precio <input name="precio" type="number" min="0" step="0.01" value="0.00" required /></label>
+                <label>Fecha <input id="fecha-venta" name="fecha" type="date" /></label>
+                <div class="form-buttons">
+                    <button type="submit">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Guardar Venta</span>
+                    </button>
+                    <button type="button" id="cancel-sale">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Cancelar</span>
+                    </button>
+                </div>
+            </form>
 
-<form id="pay-form" style="display:none">
-    <h3><i class="fas fa-money-bill-wave"></i> Agregar Pago</h3>
-    <label>Monto <input name="monto" type="number" min="0" step="0.01" value="0.00" required /></label>
-    <label>Fecha <input id="fecha-pago" name="fecha" type="date" /></label>
-    <div class="form-buttons">
-        <button type="submit">
-            <i class="fas fa-check-circle"></i>
-            <span>Guardar Pago</span>
-        </button>
-        <button type="button" id="cancel-pay">
-            <i class="fas fa-times-circle"></i>
-            <span>Cancelar</span>
-        </button>
-    </div>
-</form>
+            <form id="pay-form" style="display:none">
+                <h3><i class="fas fa-money-bill-wave"></i> Agregar Pago</h3>
+                <label>Monto <input name="monto" type="number" min="0" step="0.01" value="0.00" required /></label>
+                <label>Fecha <input id="fecha-pago" name="fecha" type="date" /></label>
+                <div class="form-buttons">
+                    <button type="submit">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Guardar Pago</span>
+                    </button>
+                    <button type="button" id="cancel-pay">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Cancelar</span>
+                    </button>
+                </div>
+            </form>
 
             <form id="pay-form" style="display:none">
                 <h3>Agregar Pago</h3>
@@ -125,6 +128,9 @@
         </div>
     </div>
 
+    <!-- jsPDF + autoTable (CDN) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <script src="/client.js"></script>
 </body>
 
