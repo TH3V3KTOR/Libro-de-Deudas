@@ -1142,6 +1142,17 @@ tbody tr:hover {
   font-weight: bold;
   white-space: nowrap;
 }
+/* ===== CENTRAR CANTIDAD EN TABLA DE MOVIMIENTOS (TODOS LOS DISPOSITIVOS) ===== */
+#mov-table th:nth-child(3),
+#mov-table td:nth-child(3) {
+  text-align: center;
+}
+@media (max-width: 767px) {
+  #mov-table th:nth-child(3),
+  #mov-table td:nth-child(3) {
+    text-align: center !important;
+  }
+}
 
 .deuda-total-titulo {
   text-align: center;
