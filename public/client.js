@@ -193,17 +193,21 @@ function renderClients(clients) {
 
       // Tabla compacta (móvil-friendly)
       const tableData = rows.map((r) => {
+        const fecha = r.fecha ? r.fecha.split("-").reverse().join("/") : "";
+
         if (Number(r.pago) > 0) {
           return [
-            r.fecha ? r.fecha.split("-").reverse().join("/") : "",
+            fecha,
             "PAGO",
+            `- ${r.cantidad || 0}`, // cantidad negativa para pagos
             `PAGA $ ${fmtMoney(r.pago)}`,
           ];
         } else {
           const total = Number(r.cantidad) * Number(r.precio);
           return [
-            r.fecha ? r.fecha.split("-").reverse().join("/") : "",
+            fecha,
             r.producto || "",
+            r.cantidad || 0,
             `DEBE $ ${fmtMoney(total)}`,
           ];
         }
@@ -211,8 +215,16 @@ function renderClients(clients) {
 
       doc.autoTable({
         startY: 28,
-        head: [["Fecha", "Detalle", "Movimiento"]],
+        head: [["Fecha", "Detalle", "Cantidad", "Movimiento"]],
         body: tableData,
+        styles: {
+          halign: "center", // centra todo por defecto
+        },
+        columnStyles: {
+          0: { halign: "center" }, // fecha
+          2: { halign: "center" }, // cantidad
+          3: { halign: "center" }, // movimiento
+        },
       });
 
       doc.save(`movimientos_${name}.pdf`);
