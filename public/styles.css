@@ -1142,3 +1142,11 @@ tbody tr:hover {
   font-weight: bold;
   white-space: nowrap;
 }
+
+.deuda-total-titulo {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 10px 0 20px 0;
+  color: #ff7a00;
+}

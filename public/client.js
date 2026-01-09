@@ -56,24 +56,26 @@ function fmtMoney(v) {
 }
 
 function getDeudaClass(deuda) {
-    const numDeuda = Number(deuda);
-    if (numDeuda === 0) return 'deuda-low';
-    if (numDeuda < 100) return 'deuda-medium';
-    return 'deuda-high';
+  const numDeuda = Number(deuda);
+  if (numDeuda === 0) return "deuda-low";
+  if (numDeuda < 100) return "deuda-medium";
+  return "deuda-high";
 }
 
 function formatDeuda(deuda) {
-    const numDeuda = Number(deuda);
-    if (numDeuda === 0) return '<span class="badge badge-success">$ ' + fmtMoney(deuda) + '</span>';
-    if (numDeuda < 100) return '<span class="badge badge-warning">$ ' + fmtMoney(deuda) + '</span>';
-    return '<span class="badge badge-danger">$ ' + fmtMoney(deuda) + '</span>';
+  const numDeuda = Number(deuda);
+  if (numDeuda === 0)
+    return '<span class="badge badge-success">$ ' + fmtMoney(deuda) + "</span>";
+  if (numDeuda < 100)
+    return '<span class="badge badge-warning">$ ' + fmtMoney(deuda) + "</span>";
+  return '<span class="badge badge-danger">$ ' + fmtMoney(deuda) + "</span>";
 }
 
 async function loadClients() {
   try {
     allClients = await api.getClients();
     renderClients(allClients);
-    
+
     // MODIFICACIÓN: Asegurar que el modal de movimientos esté oculto al cargar
     if (viewSummary && viewMov) {
       viewSummary.classList.remove("view-hidden");
@@ -110,7 +112,7 @@ function renderClients(clients) {
   clients.forEach((c) => {
     const deuda = Number(c.deuda_total);
     const deudaClass = getDeudaClass(deuda);
-    
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td data-label="Nombre">
@@ -125,9 +127,11 @@ function renderClients(clients) {
       </td>
       
       <td data-label="Último pago">
-        ${c.fecha_ultimo_pago
-  ? c.fecha_ultimo_pago.split("-").reverse().join("/")
-  : '<span style="color: var(--gray);">Sin pagos</span>'}
+        ${
+          c.fecha_ultimo_pago
+            ? c.fecha_ultimo_pago.split("-").reverse().join("/")
+            : '<span style="color: var(--gray);">Sin pagos</span>'
+        }
       </td>
       
     <td data-label="Acciones" class="actions-cell">
@@ -135,7 +139,9 @@ function renderClients(clients) {
         <i class="fas fa-eye"></i>
       </button>
 
-      <button class="btn btn-secondary print-client" data-id="${c.id}" data-name="${c.name}">
+      <button class="btn btn-secondary print-client" data-id="${
+        c.id
+      }" data-name="${c.name}">
         <i class="fas fa-print"></i>
       </button>
 
@@ -155,41 +161,63 @@ function renderClients(clients) {
       const row = e.currentTarget.closest("tr");
       const nameCell = row.querySelector(".editable-client");
       const name = nameCell ? nameCell.innerText : row.children[0].innerText;
-      
+
       openMovements(id, name);
     });
   });
 
   document.querySelectorAll(".print-client").forEach((btn) => {
-  btn.addEventListener("click", async (e) => {
-    const id = e.currentTarget.dataset.id;
-    const name = e.currentTarget.dataset.name;
+    btn.addEventListener("click", async (e) => {
+      const id = e.currentTarget.dataset.id;
+      const name = e.currentTarget.dataset.name;
 
-    const rows = await api.getMovements(id);
+      const rows = await api.getMovements(id);
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
 
-    doc.text(`Movimientos de: ${name}`, 14, 15);
+      doc.text(`Movimientos de: ${name}`, 14, 15);
 
-    const tableData = rows.map(r => ([
-      r.fecha ? r.fecha.split("-").reverse().join("/") : "",
-      r.producto || "",
-      r.cantidad,
-      r.precio,
-      r.pago,
-    ]));
+      // Calcular deuda total
+      let deudaTotal = 0;
 
-    doc.autoTable({
-      startY: 20,
-      head: [["Fecha", "Producto", "Cantidad", "Precio", "Pago"]],
-      body: tableData,
+      rows.forEach((r) => {
+        const debe = Number(r.cantidad) * Number(r.precio) || 0;
+        const paga = Number(r.pago) || 0;
+        deudaTotal += debe - paga;
+      });
+
+      // Título
+      doc.text(`Movimientos de: ${name}`, 14, 15);
+      doc.text(`DEUDA TOTAL $ ${fmtMoney(deudaTotal)}`, 14, 22);
+
+      // Tabla compacta (móvil-friendly)
+      const tableData = rows.map((r) => {
+        if (Number(r.pago) > 0) {
+          return [
+            r.fecha ? r.fecha.split("-").reverse().join("/") : "",
+            "PAGO",
+            `PAGA $ ${fmtMoney(r.pago)}`,
+          ];
+        } else {
+          const total = Number(r.cantidad) * Number(r.precio);
+          return [
+            r.fecha ? r.fecha.split("-").reverse().join("/") : "",
+            r.producto || "",
+            `DEBE $ ${fmtMoney(total)}`,
+          ];
+        }
+      });
+
+      doc.autoTable({
+        startY: 28,
+        head: [["Fecha", "Detalle", "Movimiento"]],
+        body: tableData,
+      });
+
+      doc.save(`movimientos_${name}.pdf`);
     });
-
-    doc.save(`movimientos_${name}.pdf`);
   });
-});
-
 
   // eventos para eliminar cliente
   document.querySelectorAll(".delete-client").forEach((btn) => {
@@ -198,7 +226,7 @@ function renderClients(clients) {
       const row = e.currentTarget.closest("tr");
       const nameCell = row.querySelector(".editable-client");
       const name = nameCell ? nameCell.innerText : row.children[0].innerText;
-      
+
       openConfirmModal(
         `¿Eliminar el cliente "${name}" y TODOS sus movimientos? Esta acción no se puede deshacer.`,
         async () => {
@@ -232,7 +260,7 @@ async function openMovements(id, name) {
   viewSummary.classList.add("view-hidden");
   viewMov.classList.remove("view-hidden");
   viewMov.classList.add("view-visible");
-  
+
   currentClient = { id, name };
   document.getElementById(
     "mov-cliente-name"
@@ -244,10 +272,26 @@ async function loadMovements() {
   if (!currentClient) return;
 
   const tbody = document.querySelector("#mov-table tbody");
-  tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px;"><div class="loading"></div> Cargando movimientos...</td></tr>';
+  tbody.innerHTML =
+    '<tr><td colspan="7" style="text-align: center; padding: 30px;"><div class="loading"></div> Cargando movimientos...</td></tr>';
 
   try {
     const rows = await api.getMovements(currentClient.id);
+    // ===== CALCULAR DEUDA TOTAL =====
+    let deudaTotal = 0;
+
+    rows.forEach((r) => {
+      const debe = Number(r.cantidad) * Number(r.precio) || 0;
+      const paga = Number(r.pago) || 0;
+      deudaTotal += debe - paga;
+    });
+
+    // Mostrar deuda total arriba
+    const deudaEl = document.getElementById("mov-deuda-total");
+    if (deudaEl) {
+      deudaEl.textContent = `DEUDA TOTAL $ ${fmtMoney(deudaTotal)}`;
+    }
+
     tbody.innerHTML = "";
 
     if (rows.length === 0) {
@@ -263,28 +307,27 @@ async function loadMovements() {
       return;
     }
 
-rows.forEach((r) => {
+    rows.forEach((r) => {
+      let movimientoTexto = "";
+      let movimientoClase = "";
 
-  let movimientoTexto = "";
-  let movimientoClase = "";
+      if (Number(r.pago) > 0) {
+        movimientoTexto = `PAGA $ ${fmtMoney(r.pago)}`;
+        movimientoClase = "mov-paga";
+      } else {
+        const totalDebe = Number(r.cantidad) * Number(r.precio);
+        movimientoTexto = `DEBE $ ${fmtMoney(totalDebe)}`;
+        movimientoClase = "mov-debe";
+      }
 
-  if (Number(r.pago) > 0) {
-    movimientoTexto = `PAGA $ ${fmtMoney(r.pago)}`;
-    movimientoClase = "mov-paga";
-  } else {
-    const totalDebe = Number(r.cantidad) * Number(r.precio);
-    movimientoTexto = `DEBE $ ${fmtMoney(totalDebe)}`;
-    movimientoClase = "mov-debe";
-  }
-
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
     <td data-label="Fecha">
-      ${r.fecha ? r.fecha.split("-").reverse().join("/") : '---'}
+      ${r.fecha ? r.fecha.split("-").reverse().join("/") : "---"}
     </td>
 
     <td data-label="Producto">
-      ${r.producto || '---'}
+      ${r.producto || "---"}
     </td>
 
     <td data-label="Cantidad">
@@ -296,34 +339,34 @@ rows.forEach((r) => {
     </td>
 
     <td data-label="Eliminar">
-      <button class="btn btn-danger delete-mov" data-id="${r.id}" title="Eliminar movimiento">
+      <button class="btn btn-danger delete-mov" data-id="${
+        r.id
+      }" title="Eliminar movimiento">
         <i class="fas fa-trash"></i>
       </button>
     </td>
   `;
 
-  tbody.appendChild(tr);
+      tbody.appendChild(tr);
 
-  tr.querySelector(".delete-mov").addEventListener("click", () => {
-    const producto = r.producto || "este movimiento";
-    openConfirmModal(
-      `¿Eliminar el movimiento "${producto}"? Esta acción no se puede deshacer.`,
-      async () => {
-        await api.deleteMovement(r.id);
-        loadMovements();
-      }
-    );
-  });
-});
-
+      tr.querySelector(".delete-mov").addEventListener("click", () => {
+        const producto = r.producto || "este movimiento";
+        openConfirmModal(
+          `¿Eliminar el movimiento "${producto}"? Esta acción no se puede deshacer.`,
+          async () => {
+            await api.deleteMovement(r.id);
+            loadMovements();
+          }
+        );
+      });
+    });
 
     // Actualizar fechas por defecto en formularios
     const today = new Date().toLocaleDateString("en-CA");
-    const fechaVenta = document.getElementById('fecha-venta');
-    const fechaPago = document.getElementById('fecha-pago');
+    const fechaVenta = document.getElementById("fecha-venta");
+    const fechaPago = document.getElementById("fecha-pago");
     if (fechaVenta) fechaVenta.value = today;
     if (fechaPago) fechaPago.value = today;
-
   } catch (error) {
     console.error("Error al cargar movimientos:", error);
     tbody.innerHTML = `
@@ -379,8 +422,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Configurar fechas por defecto
   const today = new Date().toLocaleDateString("en-CA");
-  const fechaVenta = document.getElementById('fecha-venta');
-  const fechaPago = document.getElementById('fecha-pago');
+  const fechaVenta = document.getElementById("fecha-venta");
+  const fechaPago = document.getElementById("fecha-pago");
   if (fechaVenta) fechaVenta.value = today;
   if (fechaPago) fechaPago.value = today;
 
@@ -431,8 +474,8 @@ if (saleForm) {
       saleForm.style.display = "none"; // MODIFICACIÓN: Directo
       // Restaurar fecha actual
       const today = new Date().toLocaleDateString("en-CA");
-      document.getElementById('fecha-venta').value = today;
-      
+      document.getElementById("fecha-venta").value = today;
+
       await loadMovements();
     } catch (err) {
       alert("Error al guardar la venta");
@@ -459,8 +502,8 @@ if (payForm) {
       payForm.style.display = "none"; // MODIFICACIÓN: Directo
       // Restaurar fecha actual
       const today = new Date().toLocaleDateString("en-CA");
-      document.getElementById('fecha-pago').value = today;
-      
+      document.getElementById("fecha-pago").value = today;
+
       await loadMovements();
     } catch (err) {
       alert("Error al guardar el pago");
@@ -520,7 +563,7 @@ document.addEventListener("keydown", (e) => {
 // Esto incluye:
 // 1. La variable movOriginalValue
 // 2. Event listeners focusin para mov-edit
-// 3. Event listeners focusout para mov-edit  
+// 3. Event listeners focusout para mov-edit
 // 4. Event listeners keydown para mov-edit
 
 // Búsqueda de clientes
@@ -549,13 +592,13 @@ if (printSummaryBtn) {
 
     doc.text("Resumen General de Clientes", 14, 15);
 
-    const data = clients.map(c => ([
+    const data = clients.map((c) => [
       c.name,
       c.deuda_total,
       c.fecha_ultimo_pago
         ? c.fecha_ultimo_pago.split("-").reverse().join("/")
-        : "—"
-    ]));
+        : "—",
+    ]);
 
     doc.autoTable({
       startY: 20,
@@ -566,7 +609,6 @@ if (printSummaryBtn) {
     doc.save("resumen_clientes.pdf");
   });
 }
-
 
 // ===== MODAL CONFIRMACIÓN =====
 const modal = document.getElementById("confirm-modal");
