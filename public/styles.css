@@ -67,15 +67,16 @@ h1 {
   border-radius: var(--border-radius);
   font-size: 16px;
   transition: var(--transition);
-  background: white;
+  background: #fffbe6; /* amarillo muy tenue */
   margin-bottom: 15px;
 }
 
 #search-client:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+  border-color: #f1c40f;
+  box-shadow: 0 0 0 3px rgba(241, 196, 15, 0.2);
 }
+
 
 #new-client-name {
   flex: 1;
@@ -701,6 +702,7 @@ tbody tr:hover {
   }
 
   #search-client {
+    background: #fffbe6;
     padding: 8px;
     font-size: 14px;
     margin-bottom: 8px;
@@ -1063,9 +1065,25 @@ tbody tr:hover {
   gap: 12px;
 }
 
+/* ===== BOTÓN IMPRIMIR ===== */
 .print-client {
-  background: #6c757d;
+  background: linear-gradient(135deg, #adb5bd, #868e96);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
+
+.print-client:hover {
+  background: linear-gradient(135deg, #868e96, #6c757d);
+  transform: translateY(-2px);
+}
+
 
 /* Para móvil, mantener las reglas específicas */
 @media (max-width: 767px) {
