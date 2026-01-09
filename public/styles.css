@@ -1130,3 +1130,15 @@ tbody tr:hover {
         font-size: 15px;
     }
 }
+
+.mov-debe {
+  color: #e5533d;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.mov-paga {
+  color: #2fa84f;
+  font-weight: bold;
+  white-space: nowrap;
+}

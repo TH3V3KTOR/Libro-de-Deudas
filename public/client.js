@@ -263,63 +263,59 @@ async function loadMovements() {
       return;
     }
 
-    rows.forEach((r) => {
-      const movimiento = Number(r.movimiento);
-      const movimientoClass = movimiento >= 0 ? 'deuda-danger' : 'deuda-success';
-      const movimientoIcon = movimiento >= 0 ? 'fas fa-arrow-up text-danger' : 'fas fa-arrow-down text-success';
-      
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td data-label="Fecha">
-          ${r.fecha ? r.fecha.split("-").reverse().join("/") : '---'}
-        </td>
-        
-        <td data-label="Producto">
-          ${r.producto || '---'}  <!-- MODIFICACIÓN: Quitado contenteditable -->
-        </td>
-        
-        <td data-label="Cantidad">
-          ${r.cantidad}  <!-- MODIFICACIÓN: Quitado contenteditable -->
-        </td>
-        
-        <td data-label="Precio">
-          $ ${fmtMoney(r.precio)}  <!-- MODIFICACIÓN: Quitado contenteditable -->
-        </td>
-        
-        <td data-label="Pago">
-          $ ${fmtMoney(r.pago)}  <!-- MODIFICACIÓN: Quitado contenteditable -->
-        </td>
-        
-        <td data-label="Movimiento" class="${movimientoClass}">
-          <i class="${movimientoIcon}" style="margin-right: 5px;"></i>
-          $ ${Math.abs(movimiento).toFixed(2)}
-        </td>
-        
-        <td data-label="Eliminar">
-          <button class="btn btn-danger delete-mov" data-id="${r.id}" title="Eliminar movimiento">
-            <i class="fas fa-trash"></i>
-          </button>
-        </td>
-      `;
+rows.forEach((r) => {
 
-      tbody.appendChild(tr);
+  let movimientoTexto = "";
+  let movimientoClase = "";
 
-      tr.querySelector(".delete-mov").addEventListener("click", () => {
-        const producto = r.producto || 'este movimiento';
-        openConfirmModal(
-          `¿Eliminar el movimiento "${producto}"? Esta acción no se puede deshacer.`,
-          async () => {
-            try {
-              await api.deleteMovement(r.id);
-              loadMovements();
-            } catch (err) {
-              alert("Error al eliminar movimiento");
-              console.error(err);
-            }
-          }
-        );
-      });
-    });
+  if (Number(r.pago) > 0) {
+    movimientoTexto = `PAGA $ ${fmtMoney(r.pago)}`;
+    movimientoClase = "mov-paga";
+  } else {
+    const totalDebe = Number(r.cantidad) * Number(r.precio);
+    movimientoTexto = `DEBE $ ${fmtMoney(totalDebe)}`;
+    movimientoClase = "mov-debe";
+  }
+
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td data-label="Fecha">
+      ${r.fecha ? r.fecha.split("-").reverse().join("/") : '---'}
+    </td>
+
+    <td data-label="Producto">
+      ${r.producto || '---'}
+    </td>
+
+    <td data-label="Cantidad">
+      ${r.cantidad || 0}
+    </td>
+
+    <td data-label="Movimiento" class="${movimientoClase}">
+      ${movimientoTexto}
+    </td>
+
+    <td data-label="Eliminar">
+      <button class="btn btn-danger delete-mov" data-id="${r.id}" title="Eliminar movimiento">
+        <i class="fas fa-trash"></i>
+      </button>
+    </td>
+  `;
+
+  tbody.appendChild(tr);
+
+  tr.querySelector(".delete-mov").addEventListener("click", () => {
+    const producto = r.producto || "este movimiento";
+    openConfirmModal(
+      `¿Eliminar el movimiento "${producto}"? Esta acción no se puede deshacer.`,
+      async () => {
+        await api.deleteMovement(r.id);
+        loadMovements();
+      }
+    );
+  });
+});
+
 
     // Actualizar fechas por defecto en formularios
     const today = new Date().toLocaleDateString("en-CA");
