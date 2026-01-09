@@ -1084,6 +1084,36 @@ tbody tr:hover {
   transform: translateY(-2px);
 }
 
+/* ===== BOTÓN IMPRIMIR RESUMEN (GENERAL) ===== */
+#print-summary {
+  background: linear-gradient(135deg, #ffb703, #ff9f1c);
+  color: #212529;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+#print-summary:hover {
+  background: linear-gradient(135deg, #ff9f1c, #ff8500);
+  transform: translateY(-2px);
+}
+@media (max-width: 767px) {
+  #print-summary {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 10px;
+    justify-content: center;
+  }
+}
 
 /* Para móvil, mantener las reglas específicas */
 @media (max-width: 767px) {
